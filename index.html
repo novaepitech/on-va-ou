@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>On va où ? | L'Aventure Aléatoire</title>
 
-        <!-- Leaflet (Carte) -->
+        <!-- Leaflet (Map) -->
         <link
             rel="stylesheet"
             href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -21,10 +21,10 @@
         <!-- Tailwind CSS (Design) -->
         <script src="https://cdn.tailwindcss.com"></script>
 
-        <!-- Feather Icons (Icônes) -->
+        <!-- Feather Icons (Icons) -->
         <script src="https://unpkg.com/feather-icons"></script>
 
-        <!-- Google Fonts pour une typographie plus sympa -->
+        <!-- Google Fonts for better typography -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -33,12 +33,12 @@
         />
 
         <style>
-            /* Un peu de CSS custom pour le slider et la police */
+            /* Some custom CSS for the slider and font */
             body {
                 font-family: "Inter", sans-serif;
             }
 
-            /* Personnalisation du slider de rayon */
+            /* Radius slider customization */
             input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
                 appearance: none;
@@ -47,7 +47,7 @@
                 background: #4f46e5; /* Indigo-600 de Tailwind */
                 cursor: pointer;
                 border-radius: 50%;
-                margin-top: -8px; /* Centrer le pouce sur la barre */
+                margin-top: -8px; /* Center the thumb on the bar */
             }
 
             input[type="range"]::-moz-range-thumb {
@@ -58,7 +58,7 @@
                 border-radius: 50%;
             }
 
-            /* Animation pour l'icône de chargement */
+            /* Animation for the loading icon */
             @keyframes spin {
                 from {
                     transform: rotate(0deg);
@@ -74,7 +74,7 @@
     </head>
     <body class="h-full antialiased">
         <div class="grid md:grid-cols-2 min-h-screen">
-            <!-- Panneau de Contrôle (Gauche) -->
+            <!-- Control Panel (Left) -->
             <div
                 class="flex flex-col bg-white p-6 sm:p-10 shadow-2xl md:shadow-none z-10"
             >
@@ -85,14 +85,14 @@
                         On va où ?
                     </h1>
                     <p class="mt-2 text-slate-500">
-                        Le concept de
+                        The concept of
                         <span class="font-semibold text-slate-600">Djilsi</span
-                        >, pour vous et vos potes. Prêts pour l'aventure ?
+                        >, for you and your friends. Ready for adventure?
                     </p>
                 </header>
 
                 <main class="flex flex-col space-y-8 flex-grow">
-                    <!-- Étape 1: Localisation -->
+                    <!-- Step 1: Location -->
                     <div class="step">
                         <div class="flex items-center mb-3">
                             <span
@@ -100,26 +100,26 @@
                                 >1</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Votre position
+                                Your position
                             </h2>
                         </div>
                         <div class="ml-12 space-y-4">
                             <p class="text-slate-500">
-                                Utilisez la géolocalisation, cherchez votre
-                                adresse, ou cliquez directement sur la carte
-                                pour définir votre point de départ.
+                                Use geolocation, search for your address, or
+                                click directly on the map to set your starting
+                                point.
                             </p>
 
-                            <!-- Option 1: Géolocalisation -->
+                            <!-- Option 1: Geolocation -->
                             <button
                                 id="locateBtn"
                                 class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                                 <i data-feather="map-pin" class="w-5 h-5"></i>
-                                <span>Me localiser</span>
+                                <span>Locate me</span>
                             </button>
 
-                            <!-- Séparateur -->
+                            <!-- Separator -->
                             <div
                                 class="flex items-center text-slate-400 text-sm"
                             >
@@ -127,19 +127,19 @@
                                     class="flex-grow border-t border-slate-200"
                                 ></div>
                                 <span class="flex-shrink mx-4 font-semibold"
-                                    >OU</span
+                                    >OR</span
                                 >
                                 <div
                                     class="flex-grow border-t border-slate-200"
                                 ></div>
                             </div>
 
-                            <!-- Option 2: Recherche par adresse -->
+                            <!-- Option 2: Address search -->
                             <form id="addressForm" class="flex gap-2">
                                 <input
                                     type="text"
                                     id="addressInput"
-                                    placeholder="Entrez une ville, une adresse..."
+                                    placeholder="Enter a city, an address..."
                                     class="flex-grow w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                                 />
                                 <button
@@ -156,7 +156,7 @@
                         </div>
                     </div>
 
-                    <!-- Étape 2: Rayon -->
+                    <!-- Step 2: Radius -->
                     <div class="step opacity-40" id="step2">
                         <div class="flex items-center mb-3">
                             <span
@@ -165,7 +165,7 @@
                                 >2</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Rayon de recherche
+                                Search radius
                             </h2>
                         </div>
                         <div class="ml-12">
@@ -173,7 +173,7 @@
                                 class="flex justify-between items-center text-slate-600 mb-2"
                             >
                                 <label for="radius" class="font-medium"
-                                    >Distance maximale :</label
+                                    >Maximum distance:</label
                                 >
                                 <span
                                     id="radiusValue"
@@ -194,7 +194,7 @@
                         </div>
                     </div>
 
-                    <!-- Étape 3: Go! -->
+                    <!-- Step 3: Go! -->
                     <div class="step opacity-40" id="step3">
                         <div class="flex items-center mb-3">
                             <span
@@ -203,7 +203,7 @@
                                 >3</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Destination finale
+                                Final destination
                             </h2>
                         </div>
                         <button
@@ -212,16 +212,14 @@
                             class="w-full flex items-center justify-center gap-3 bg-emerald-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-emerald-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-slate-300 disabled:shadow-none disabled:cursor-not-allowed transform hover:scale-105"
                         >
                             <i data-feather="send" class="w-6 h-6"></i>
-                            <span class="text-xl"
-                                >Trouver une destination !</span
-                            >
+                            <span class="text-xl">Find a destination!</span>
                         </button>
                     </div>
                 </main>
 
                 <footer class="text-center text-slate-400 text-sm mt-10">
                     <p>
-                        Créé avec ❤️ pour l'aventure. Cartes par
+                        Created with ❤️ for adventure. Maps by
                         <a
                             href="https://www.openstreetmap.org/copyright"
                             target="_blank"
@@ -232,16 +230,16 @@
                 </footer>
             </div>
 
-            <!-- Panneau de la Carte (Droite) -->
+            <!-- Map Panel (Right) -->
             <div id="map" class="h-96 md:h-full w-full"></div>
         </div>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-                // Rendre les icônes
+                // Render icons
                 feather.replace();
 
-                // Références aux éléments HTML
+                // References to HTML elements
                 const locateBtn = document.getElementById("locateBtn");
                 const addressForm = document.getElementById("addressForm");
                 const addressInput = document.getElementById("addressInput");
@@ -255,13 +253,13 @@
                 const step2Bubble = document.getElementById("step2-bubble");
                 const step3Bubble = document.getElementById("step3-bubble");
 
-                // Variables globales
+                // Global variables
                 let map;
                 let userMarker, searchCircle, randomMarker;
                 let userLocation = null;
 
-                // --- INITIALISATION DE LA CARTE ---
-                map = L.map("map").setView([46.6, 1.88], 5); // Vue large de la France
+                // --- MAP INITIALIZATION ---
+                map = L.map("map").setView([46.6, 1.88], 5); // Wide view of France
                 L.tileLayer(
                     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     {
@@ -270,14 +268,14 @@
                     },
                 ).addTo(map);
 
-                // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
+                // --- EVENT HANDLERS ---
                 locateBtn.addEventListener("click", locateUser);
                 addressForm.addEventListener("submit", searchAddress);
                 map.on("click", handleMapClick);
                 radiusSlider.addEventListener("input", updateRadiusUI);
                 findPointBtn.addEventListener("click", findRandomPoint);
 
-                // --- FONCTIONS PRINCIPALES ---
+                // --- MAIN FUNCTIONS ---
 
                 function setUserLocation(lat, lng, zoomLevel = 13) {
                     userLocation = { lat, lng };
@@ -293,7 +291,7 @@
                         });
                         userMarker = L.marker([lat, lng], { icon: userIcon })
                             .addTo(map)
-                            .bindPopup("<b>Votre point de départ</b>");
+                            .bindPopup("<b>Your starting point</b>");
                     }
 
                     map.setView([lat, lng], zoomLevel);
@@ -304,9 +302,7 @@
 
                 function locateUser() {
                     if (!navigator.geolocation) {
-                        alert(
-                            "La géolocalisation n'est pas supportée par votre navigateur.",
-                        );
+                        alert("Geolocation is not supported by your browser.");
                         return;
                     }
 
@@ -321,7 +317,7 @@
                         },
                         (error) => {
                             alert(
-                                "Impossible de récupérer votre position. Avez-vous bien autorisé l'accès ? Essayez de chercher votre adresse ou de cliquer sur la carte.",
+                                "Unable to retrieve your position. Have you authorized access? Try searching for your address or clicking on the map.",
                             );
                             console.error(error);
                             setLocateBtnLoadingState(false);
@@ -333,7 +329,7 @@
                     event.preventDefault();
                     const query = addressInput.value;
                     if (!query) {
-                        alert("Veuillez entrer une adresse.");
+                        alert("Please enter an address.");
                         return;
                     }
                     setSearchBtnLoadingState(true);
@@ -342,9 +338,7 @@
                             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
                         );
                         if (!response.ok)
-                            throw new Error(
-                                "Erreur réseau lors de la recherche.",
-                            );
+                            throw new Error("Network error during search.");
 
                         const data = await response.json();
                         if (data && data.length > 0) {
@@ -352,13 +346,13 @@
                             setUserLocation(parseFloat(lat), parseFloat(lon));
                         } else {
                             alert(
-                                "Adresse non trouvée. Essayez d'être plus précis.",
+                                "Address not found. Try to be more specific.",
                             );
                         }
                     } catch (error) {
-                        console.error("Erreur de géocodage:", error);
+                        console.error("Geocoding error:", error);
                         alert(
-                            "Une erreur est survenue lors de la recherche de l'adresse.",
+                            "An error occurred while searching for the address.",
                         );
                     } finally {
                         setSearchBtnLoadingState(false);
@@ -368,9 +362,7 @@
                 function handleMapClick(e) {
                     if (
                         userLocation &&
-                        !confirm(
-                            "Définir ce point comme nouvelle position de départ ?",
-                        )
+                        !confirm("Set this point as the new starting position?")
                     ) {
                         return;
                     }
@@ -420,15 +412,15 @@
                     map.fitBounds(group.getBounds().pad(0.3));
                 }
 
-                // --- FONCTIONS D'INTERFACE (UI) ---
+                // --- UI FUNCTIONS ---
 
                 function setLocateBtnLoadingState(isLoading) {
                     if (isLoading) {
                         locateBtn.disabled = true;
-                        locateBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i> <span>Localisation...</span>`;
+                        locateBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i> <span>Locating...</span>`;
                     } else {
                         locateBtn.disabled = false;
-                        locateBtn.innerHTML = `<i data-feather="map-pin" class="w-5 h-5"></i> <span>Me localiser</span>`;
+                        locateBtn.innerHTML = `<i data-feather="map-pin" class="w-5 h-5"></i> <span>Locate me</span>`;
                     }
                     feather.replace();
                 }
