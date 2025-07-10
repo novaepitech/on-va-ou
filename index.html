@@ -259,6 +259,40 @@
         </div>
 
         <script>
+            // This function must be in the global scope to be called from the popup's HTML string.
+            function copyCoordsToClipboard(lat, lng, element) {
+                const coordsText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                if (!navigator.clipboard) {
+                    alert(`Impossible de copier. Coordonnées: ${coordsText}`);
+                    return;
+                }
+                navigator.clipboard
+                    .writeText(coordsText)
+                    .then(() => {
+                        const originalText = element.innerHTML;
+                        const originalBg = element.style.backgroundColor;
+                        const originalColor = element.style.color;
+
+                        element.innerHTML = "Copié !";
+                        element.disabled = true;
+                        element.style.backgroundColor = "#dcfce7"; // Tailwind's green-100
+                        element.style.color = "#166534"; // Tailwind's green-800
+
+                        setTimeout(() => {
+                            element.innerHTML = originalText;
+                            element.disabled = false;
+                            element.style.backgroundColor = originalBg;
+                            element.style.color = originalColor;
+                        }, 2000); // Revert after 2 seconds
+                    })
+                    .catch((err) => {
+                        console.error("Failed to copy coordinates: ", err);
+                        alert(
+                            `Impossible de copier. Coordonnées: ${coordsText}`,
+                        );
+                    });
+            }
+
             document.addEventListener("DOMContentLoaded", () => {
                 // Render icons
                 feather.replace();
@@ -426,13 +460,21 @@
                     const googleMapsUrl = `https://www.google.com/maps?q=${foundLat},${foundLng}`;
 
                     const popupContent = `
-                        <div style="font-family: 'Inter', sans-serif; line-height: 1.5;">
-                            <h2 style="font-weight: 700; font-size: 1.1em; margin-bottom: 5px;">ON VA LÀ !</h2>
-                            <div style="font-size: 0.9em; margin-bottom: 10px;">
-                                <p style="margin: 0;"><strong>Lat:</strong> ${latDisplay}</p>
-                                <p style="margin: 0;"><strong>Lon:</strong> ${lngDisplay}</p>
+                        <div style="font-family: 'Inter', sans-serif; line-height: 1.5; min-width: 190px;">
+                            <h2 style="font-weight: 800; font-size: 1.2em; margin-bottom: 8px; color: #1e293b;">ON VA LÀ !</h2>
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="font-size: 0.9em; line-height: 1.4;">
+                                    <p style="margin: 0;"><strong style="color: #475569;">Lat:</strong> ${latDisplay}</p>
+                                    <p style="margin: 0;"><strong style="color: #475569;">Lon:</strong> ${lngDisplay}</p>
+                                </div>
+                                <button
+                                    onclick="copyCoordsToClipboard(${foundLat}, ${foundLng}, this)"
+                                    style="background-color: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 6px 10px; border-radius: 6px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85em; cursor: pointer; transition: all 0.2s;"
+                                >
+                                    Copier
+                                </button>
                             </div>
-                            <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; font-weight: 600; text-decoration: none;">
+                            <a href="${googleMapsUrl}" target="_blank" rel="noopener noreferrer" style="color: #4f46e5; font-weight: 600; text-decoration: none; display: inline-block;">
                                 Voir sur Google Maps →
                             </a>
                         </div>
