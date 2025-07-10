@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="fr" class="h-full bg-slate-100">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>On va où ? | L'Aventure Aléatoire</title>
+
+        <!-- Leaflet (Carte) -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+
+        <!-- Tailwind CSS (Design) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Feather Icons (Icônes) -->
+        <script src="https://unpkg.com/feather-icons"></script>
+
+        <!-- Google Fonts pour une typographie plus sympa -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            /* Un peu de CSS custom pour le slider et la police */
+            body {
+                font-family: "Inter", sans-serif;
+            }
+
+            /* Personnalisation du slider de rayon */
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 24px;
+                height: 24px;
+                background: #4f46e5; /* Indigo-600 de Tailwind */
+                cursor: pointer;
+                border-radius: 50%;
+                margin-top: -8px; /* Centrer le pouce sur la barre */
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+                background: #4f46e5;
+                cursor: pointer;
+                border-radius: 50%;
+            }
+
+            /* Animation pour l'icône de chargement */
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            .animate-spin-slow {
+                animation: spin 1.5s linear infinite;
+            }
+        </style>
+    </head>
+    <body class="h-full antialiased">
+        <div class="grid md:grid-cols-2 min-h-screen">
+            <!-- Panneau de Contrôle (Gauche) -->
+            <div
+                class="flex flex-col bg-white p-6 sm:p-10 shadow-2xl md:shadow-none z-10"
+            >
+                <header class="mb-10">
+                    <h1
+                        class="text-4xl sm:text-5xl font-extrabold text-slate-800 tracking-tight"
+                    >
+                        On va où ?
+                    </h1>
+                    <p class="mt-2 text-slate-500">
+                        Le concept de
+                        <span class="font-semibold text-slate-600">Djilsi</span
+                        >, pour vous et vos potes. Prêts pour l'aventure ?
+                    </p>
+                </header>
+
+                <main class="flex flex-col space-y-8 flex-grow">
+                    <!-- Étape 1: Localisation -->
+                    <div class="step">
+                        <div class="flex items-center mb-3">
+                            <span
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-lg mr-4"
+                                >1</span
+                            >
+                            <h2 class="text-2xl font-bold text-slate-700">
+                                Votre position
+                            </h2>
+                        </div>
+                        <p class="text-slate-500 mb-4 ml-12">
+                            Cliquez pour nous permettre de vous trouver.
+                        </p>
+                        <button
+                            id="locateBtn"
+                            class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                            <i data-feather="map-pin" class="w-5 h-5"></i>
+                            <span>Me localiser</span>
+                        </button>
+                    </div>
+
+                    <!-- Étape 2: Rayon -->
+                    <div class="step opacity-40" id="step2">
+                        <div class="flex items-center mb-3">
+                            <span
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-300 text-slate-600 font-bold text-lg mr-4"
+                                id="step2-bubble"
+                                >2</span
+                            >
+                            <h2 class="text-2xl font-bold text-slate-700">
+                                Rayon de recherche
+                            </h2>
+                        </div>
+                        <div class="ml-12">
+                            <div
+                                class="flex justify-between items-center text-slate-600 mb-2"
+                            >
+                                <label for="radius" class="font-medium"
+                                    >Distance maximale :</label
+                                >
+                                <span
+                                    id="radiusValue"
+                                    class="font-bold text-lg text-indigo-600 bg-indigo-100 px-3 py-1 rounded-md"
+                                    >850 km</span
+                                >
+                            </div>
+                            <input
+                                type="range"
+                                id="radius"
+                                min="10"
+                                max="2000"
+                                value="850"
+                                step="10"
+                                disabled
+                                class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Étape 3: Go! -->
+                    <div class="step opacity-40" id="step3">
+                        <div class="flex items-center mb-3">
+                            <span
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-300 text-slate-600 font-bold text-lg mr-4"
+                                id="step3-bubble"
+                                >3</span
+                            >
+                            <h2 class="text-2xl font-bold text-slate-700">
+                                Destination finale
+                            </h2>
+                        </div>
+                        <button
+                            id="findPointBtn"
+                            disabled
+                            class="w-full flex items-center justify-center gap-3 bg-emerald-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-emerald-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-slate-300 disabled:shadow-none disabled:cursor-not-allowed transform hover:scale-105"
+                        >
+                            <i data-feather="send" class="w-6 h-6"></i>
+                            <span class="text-xl"
+                                >Trouver une destination !</span
+                            >
+                        </button>
+                    </div>
+                </main>
+
+                <footer class="text-center text-slate-400 text-sm mt-10">
+                    <p>
+                        Créé avec ❤️ pour l'aventure. Cartes par
+                        <a
+                            href="https://www.openstreetmap.org/copyright"
+                            target="_blank"
+                            class="underline hover:text-indigo-500"
+                            >OpenStreetMap</a
+                        >.
+                    </p>
+                </footer>
+            </div>
+
+            <!-- Panneau de la Carte (Droite) -->
+            <div id="map" class="h-96 md:h-full w-full"></div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                // Rendre les icônes
+                feather.replace();
+
+                // Références aux éléments HTML
+                const locateBtn = document.getElementById("locateBtn");
+                const findPointBtn = document.getElementById("findPointBtn");
+                const radiusSlider = document.getElementById("radius");
+                const radiusValueSpan = document.getElementById("radiusValue");
+                const step2 = document.getElementById("step2");
+                const step3 = document.getElementById("step3");
+                const step2Bubble = document.getElementById("step2-bubble");
+                const step3Bubble = document.getElementById("step3-bubble");
+
+                // Variables globales
+                let map;
+                let userMarker, searchCircle, randomMarker;
+                let userLocation = null;
+
+                // --- INITIALISATION ---
+                map = L.map("map").setView([46.6, 1.88], 5); // Vue large de la France
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution:
+                            '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                    },
+                ).addTo(map);
+
+                // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
+                locateBtn.addEventListener("click", locateUser);
+                radiusSlider.addEventListener("input", updateRadiusUI);
+                findPointBtn.addEventListener("click", findRandomPoint);
+
+                // --- FONCTIONS PRINCIPALES ---
+
+                function locateUser() {
+                    if (!navigator.geolocation) {
+                        alert(
+                            "La géolocalisation n'est pas supportée par votre navigateur.",
+                        );
+                        return;
+                    }
+
+                    setLoadingState(true);
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                            };
+
+                            if (userMarker)
+                                userMarker.setLatLng([
+                                    userLocation.lat,
+                                    userLocation.lng,
+                                ]);
+                            else {
+                                const userIcon = L.divIcon({
+                                    html: `<div class="h-6 w-6 bg-blue-500 rounded-full border-4 border-white shadow-lg"></div>`,
+                                    className: "",
+                                    iconSize: [24, 24],
+                                    iconAnchor: [12, 12],
+                                });
+                                userMarker = L.marker(
+                                    [userLocation.lat, userLocation.lng],
+                                    { icon: userIcon },
+                                )
+                                    .addTo(map)
+                                    .bindPopup(
+                                        "<b>C'est ici que vous êtes !</b>",
+                                    );
+                            }
+
+                            map.setView(
+                                [userLocation.lat, userLocation.lng],
+                                13,
+                            );
+                            drawSearchCircle();
+                            activateControls();
+                            setLoadingState(false);
+                            userMarker.openPopup();
+                        },
+                        (error) => {
+                            alert(
+                                "Impossible de récupérer votre position. Avez-vous bien autorisé l'accès à votre localisation ?",
+                            );
+                            console.error(error);
+                            setLoadingState(false);
+                        },
+                    );
+                }
+
+                function findRandomPoint() {
+                    if (!userLocation) return;
+                    if (randomMarker) map.removeLayer(randomMarker);
+
+                    const radiusMeters = radiusSlider.value * 1000;
+                    const r_earth = 6378137; // Rayon de la Terre en mètres
+                    const y0 = userLocation.lat;
+                    const x0 = userLocation.lng;
+
+                    const u = Math.random();
+                    const v = Math.random();
+
+                    const w = (radiusMeters / r_earth) * Math.sqrt(u);
+                    const t = 2 * Math.PI * v;
+                    const x = w * Math.cos(t);
+                    const y = w * Math.sin(t);
+
+                    const new_x = x / Math.cos((y0 * Math.PI) / 180);
+
+                    const foundLat = y0 + (y * 180) / Math.PI;
+                    const foundLng = x0 + (new_x * 180) / Math.PI;
+
+                    const destIcon = L.divIcon({
+                        html: `<div class="flex flex-col items-center -mt-2 -ml-2"><i data-feather="flag" class="w-8 h-8 text-red-500"></i><span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full -mt-2 shadow">GO!</span></div>`,
+                        className: "",
+                        iconSize: [32, 32],
+                    });
+
+                    randomMarker = L.marker([foundLat, foundLng], {
+                        icon: destIcon,
+                    })
+                        .addTo(map)
+                        .bindPopup("<h2>ON VA LÀ !</h2><p>Bonne aventure !</p>")
+                        .openPopup();
+
+                    feather.replace(); // Rendre la nouvelle icône
+
+                    const group = new L.featureGroup([
+                        userMarker,
+                        randomMarker,
+                    ]);
+                    map.fitBounds(group.getBounds().pad(0.3));
+                }
+
+                // --- FONCTIONS D'INTERFACE (UI) ---
+
+                function setLoadingState(isLoading) {
+                    if (isLoading) {
+                        locateBtn.disabled = true;
+                        locateBtn.innerHTML = `
+                <i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i>
+                <span>Localisation...</span>`;
+                    } else {
+                        locateBtn.disabled = false;
+                        locateBtn.innerHTML = `
+                <i data-feather="map-pin" class="w-5 h-5"></i>
+                <span>Me localiser</span>`;
+                    }
+                    feather.replace();
+                }
+
+                function activateControls() {
+                    // Étape 2
+                    step2.classList.remove("opacity-40");
+                    step2Bubble.classList.remove(
+                        "bg-slate-300",
+                        "text-slate-600",
+                    );
+                    step2Bubble.classList.add("bg-indigo-600", "text-white");
+                    radiusSlider.disabled = false;
+
+                    // Étape 3
+                    step3.classList.remove("opacity-40");
+                    step3Bubble.classList.remove(
+                        "bg-slate-300",
+                        "text-slate-600",
+                    );
+                    step3Bubble.classList.add("bg-indigo-600", "text-white");
+                    findPointBtn.disabled = false;
+                }
+
+                function updateRadiusUI() {
+                    radiusValueSpan.textContent = `${radiusSlider.value} km`;
+                    if (userLocation) {
+                        drawSearchCircle();
+                    }
+                }
+
+                function drawSearchCircle() {
+                    if (searchCircle) map.removeLayer(searchCircle);
+
+                    const radiusMeters = radiusSlider.value * 1000;
+                    searchCircle = L.circle(
+                        [userLocation.lat, userLocation.lng],
+                        {
+                            radius: radiusMeters,
+                            color: "#4f46e5", // indigo-600
+                            weight: 3,
+                            fillColor: "#4f46e5",
+                            fillOpacity: 0.1,
+                        },
+                    ).addTo(map);
+
+                    if (map.getZoom() > 2) {
+                        // Evite le zoom/dezoom au chargement initial
+                        map.fitBounds(searchCircle.getBounds());
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
