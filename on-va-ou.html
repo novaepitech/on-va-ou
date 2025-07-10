@@ -103,16 +103,57 @@
                                 Votre position
                             </h2>
                         </div>
-                        <p class="text-slate-500 mb-4 ml-12">
-                            Cliquez pour nous permettre de vous trouver.
-                        </p>
-                        <button
-                            id="locateBtn"
-                            class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            <i data-feather="map-pin" class="w-5 h-5"></i>
-                            <span>Me localiser</span>
-                        </button>
+                        <div class="ml-12 space-y-4">
+                            <p class="text-slate-500">
+                                Utilisez la géolocalisation, cherchez votre
+                                adresse, ou cliquez directement sur la carte
+                                pour définir votre point de départ.
+                            </p>
+
+                            <!-- Option 1: Géolocalisation -->
+                            <button
+                                id="locateBtn"
+                                class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                <i data-feather="map-pin" class="w-5 h-5"></i>
+                                <span>Me localiser</span>
+                            </button>
+
+                            <!-- Séparateur -->
+                            <div
+                                class="flex items-center text-slate-400 text-sm"
+                            >
+                                <div
+                                    class="flex-grow border-t border-slate-200"
+                                ></div>
+                                <span class="flex-shrink mx-4 font-semibold"
+                                    >OU</span
+                                >
+                                <div
+                                    class="flex-grow border-t border-slate-200"
+                                ></div>
+                            </div>
+
+                            <!-- Option 2: Recherche par adresse -->
+                            <form id="addressForm" class="flex gap-2">
+                                <input
+                                    type="text"
+                                    id="addressInput"
+                                    placeholder="Entrez une ville, une adresse..."
+                                    class="flex-grow w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                                />
+                                <button
+                                    type="submit"
+                                    id="searchAddressBtn"
+                                    class="flex-shrink-0 flex items-center justify-center gap-2 bg-slate-700 text-white font-bold p-3 rounded-lg hover:bg-slate-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500"
+                                >
+                                    <i
+                                        data-feather="search"
+                                        class="w-5 h-5"
+                                    ></i>
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Étape 2: Rayon -->
@@ -202,6 +243,10 @@
 
                 // Références aux éléments HTML
                 const locateBtn = document.getElementById("locateBtn");
+                const addressForm = document.getElementById("addressForm");
+                const addressInput = document.getElementById("addressInput");
+                const searchAddressBtn =
+                    document.getElementById("searchAddressBtn");
                 const findPointBtn = document.getElementById("findPointBtn");
                 const radiusSlider = document.getElementById("radius");
                 const radiusValueSpan = document.getElementById("radiusValue");
@@ -215,7 +260,7 @@
                 let userMarker, searchCircle, randomMarker;
                 let userLocation = null;
 
-                // --- INITIALISATION ---
+                // --- INITIALISATION DE LA CARTE ---
                 map = L.map("map").setView([46.6, 1.88], 5); // Vue large de la France
                 L.tileLayer(
                     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -227,10 +272,35 @@
 
                 // --- GESTIONNAIRES D'ÉVÉNEMENTS ---
                 locateBtn.addEventListener("click", locateUser);
+                addressForm.addEventListener("submit", searchAddress);
+                map.on("click", handleMapClick);
                 radiusSlider.addEventListener("input", updateRadiusUI);
                 findPointBtn.addEventListener("click", findRandomPoint);
 
                 // --- FONCTIONS PRINCIPALES ---
+
+                function setUserLocation(lat, lng, zoomLevel = 13) {
+                    userLocation = { lat, lng };
+
+                    if (userMarker) {
+                        userMarker.setLatLng([lat, lng]);
+                    } else {
+                        const userIcon = L.divIcon({
+                            html: `<div class="h-6 w-6 bg-blue-500 rounded-full border-4 border-white shadow-lg"></div>`,
+                            className: "",
+                            iconSize: [24, 24],
+                            iconAnchor: [12, 12],
+                        });
+                        userMarker = L.marker([lat, lng], { icon: userIcon })
+                            .addTo(map)
+                            .bindPopup("<b>Votre point de départ</b>");
+                    }
+
+                    map.setView([lat, lng], zoomLevel);
+                    drawSearchCircle();
+                    activateControls();
+                    userMarker.openPopup();
+                }
 
                 function locateUser() {
                     if (!navigator.geolocation) {
@@ -240,54 +310,71 @@
                         return;
                     }
 
-                    setLoadingState(true);
-
+                    setLocateBtnLoadingState(true);
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            userLocation = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude,
-                            };
-
-                            if (userMarker)
-                                userMarker.setLatLng([
-                                    userLocation.lat,
-                                    userLocation.lng,
-                                ]);
-                            else {
-                                const userIcon = L.divIcon({
-                                    html: `<div class="h-6 w-6 bg-blue-500 rounded-full border-4 border-white shadow-lg"></div>`,
-                                    className: "",
-                                    iconSize: [24, 24],
-                                    iconAnchor: [12, 12],
-                                });
-                                userMarker = L.marker(
-                                    [userLocation.lat, userLocation.lng],
-                                    { icon: userIcon },
-                                )
-                                    .addTo(map)
-                                    .bindPopup(
-                                        "<b>C'est ici que vous êtes !</b>",
-                                    );
-                            }
-
-                            map.setView(
-                                [userLocation.lat, userLocation.lng],
-                                13,
+                            setUserLocation(
+                                position.coords.latitude,
+                                position.coords.longitude,
                             );
-                            drawSearchCircle();
-                            activateControls();
-                            setLoadingState(false);
-                            userMarker.openPopup();
+                            setLocateBtnLoadingState(false);
                         },
                         (error) => {
                             alert(
-                                "Impossible de récupérer votre position. Avez-vous bien autorisé l'accès à votre localisation ?",
+                                "Impossible de récupérer votre position. Avez-vous bien autorisé l'accès ? Essayez de chercher votre adresse ou de cliquer sur la carte.",
                             );
                             console.error(error);
-                            setLoadingState(false);
+                            setLocateBtnLoadingState(false);
                         },
                     );
+                }
+
+                async function searchAddress(event) {
+                    event.preventDefault();
+                    const query = addressInput.value;
+                    if (!query) {
+                        alert("Veuillez entrer une adresse.");
+                        return;
+                    }
+                    setSearchBtnLoadingState(true);
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+                        );
+                        if (!response.ok)
+                            throw new Error(
+                                "Erreur réseau lors de la recherche.",
+                            );
+
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            const { lat, lon } = data[0];
+                            setUserLocation(parseFloat(lat), parseFloat(lon));
+                        } else {
+                            alert(
+                                "Adresse non trouvée. Essayez d'être plus précis.",
+                            );
+                        }
+                    } catch (error) {
+                        console.error("Erreur de géocodage:", error);
+                        alert(
+                            "Une erreur est survenue lors de la recherche de l'adresse.",
+                        );
+                    } finally {
+                        setSearchBtnLoadingState(false);
+                    }
+                }
+
+                function handleMapClick(e) {
+                    if (
+                        userLocation &&
+                        !confirm(
+                            "Définir ce point comme nouvelle position de départ ?",
+                        )
+                    ) {
+                        return;
+                    }
+                    setUserLocation(e.latlng.lat, e.latlng.lng, map.getZoom());
                 }
 
                 function findRandomPoint() {
@@ -295,7 +382,7 @@
                     if (randomMarker) map.removeLayer(randomMarker);
 
                     const radiusMeters = radiusSlider.value * 1000;
-                    const r_earth = 6378137; // Rayon de la Terre en mètres
+                    const r_earth = 6378137;
                     const y0 = userLocation.lat;
                     const x0 = userLocation.lng;
 
@@ -324,8 +411,7 @@
                         .addTo(map)
                         .bindPopup("<h2>ON VA LÀ !</h2><p>Bonne aventure !</p>")
                         .openPopup();
-
-                    feather.replace(); // Rendre la nouvelle icône
+                    feather.replace();
 
                     const group = new L.featureGroup([
                         userMarker,
@@ -336,23 +422,28 @@
 
                 // --- FONCTIONS D'INTERFACE (UI) ---
 
-                function setLoadingState(isLoading) {
+                function setLocateBtnLoadingState(isLoading) {
                     if (isLoading) {
                         locateBtn.disabled = true;
-                        locateBtn.innerHTML = `
-                <i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i>
-                <span>Localisation...</span>`;
+                        locateBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i> <span>Localisation...</span>`;
                     } else {
                         locateBtn.disabled = false;
-                        locateBtn.innerHTML = `
-                <i data-feather="map-pin" class="w-5 h-5"></i>
-                <span>Me localiser</span>`;
+                        locateBtn.innerHTML = `<i data-feather="map-pin" class="w-5 h-5"></i> <span>Me localiser</span>`;
+                    }
+                    feather.replace();
+                }
+
+                function setSearchBtnLoadingState(isLoading) {
+                    searchAddressBtn.disabled = isLoading;
+                    if (isLoading) {
+                        searchAddressBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i>`;
+                    } else {
+                        searchAddressBtn.innerHTML = `<i data-feather="search" class="w-5 h-5"></i>`;
                     }
                     feather.replace();
                 }
 
                 function activateControls() {
-                    // Étape 2
                     step2.classList.remove("opacity-40");
                     step2Bubble.classList.remove(
                         "bg-slate-300",
@@ -361,7 +452,6 @@
                     step2Bubble.classList.add("bg-indigo-600", "text-white");
                     radiusSlider.disabled = false;
 
-                    // Étape 3
                     step3.classList.remove("opacity-40");
                     step3Bubble.classList.remove(
                         "bg-slate-300",
@@ -386,7 +476,7 @@
                         [userLocation.lat, userLocation.lng],
                         {
                             radius: radiusMeters,
-                            color: "#4f46e5", // indigo-600
+                            color: "#4f46e5",
                             weight: 3,
                             fillColor: "#4f46e5",
                             fillOpacity: 0.1,
@@ -394,7 +484,6 @@
                     ).addTo(map);
 
                     if (map.getZoom() > 2) {
-                        // Evite le zoom/dezoom au chargement initial
                         map.fitBounds(searchCircle.getBounds());
                     }
                 }
