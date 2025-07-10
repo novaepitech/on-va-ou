@@ -58,6 +58,16 @@
                 border-radius: 50%;
             }
 
+            /* Hide number input arrows */
+            input[type="number"]::-webkit-inner-spin-button,
+            input[type="number"]::-webkit-outer-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            input[type="number"] {
+                -moz-appearance: textfield; /* Firefox */
+            }
+
             /* Animation for the loading icon */
             @keyframes spin {
                 from {
@@ -85,9 +95,9 @@
                         On va où ?
                     </h1>
                     <p class="mt-2 text-slate-500">
-                        The concept of
+                        Le concept de
                         <span class="font-semibold text-slate-600">Djilsi</span
-                        >, for you and your friends. Ready for adventure?
+                        >, pour vous et vos amis. Prêts pour l'aventure ?
                     </p>
                 </header>
 
@@ -100,14 +110,14 @@
                                 >1</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Your position
+                                Votre position
                             </h2>
                         </div>
                         <div class="ml-12 space-y-4">
                             <p class="text-slate-500">
-                                Use geolocation, search for your address, or
-                                click directly on the map to set your starting
-                                point.
+                                Utilisez la géolocalisation, cherchez votre
+                                adresse, ou cliquez directement sur la carte
+                                pour définir votre point de départ.
                             </p>
 
                             <!-- Option 1: Geolocation -->
@@ -116,7 +126,7 @@
                                 class="w-full flex items-center justify-center gap-3 bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                                 <i data-feather="map-pin" class="w-5 h-5"></i>
-                                <span>Locate me</span>
+                                <span>Me géolocaliser</span>
                             </button>
 
                             <!-- Separator -->
@@ -127,7 +137,7 @@
                                     class="flex-grow border-t border-slate-200"
                                 ></div>
                                 <span class="flex-shrink mx-4 font-semibold"
-                                    >OR</span
+                                    >OU</span
                                 >
                                 <div
                                     class="flex-grow border-t border-slate-200"
@@ -139,7 +149,7 @@
                                 <input
                                     type="text"
                                     id="addressInput"
-                                    placeholder="Enter a city, an address..."
+                                    placeholder="Entrez une ville, une adresse..."
                                     class="flex-grow w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                                 />
                                 <button
@@ -165,25 +175,37 @@
                                 >2</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Search radius
+                                Rayon de recherche
                             </h2>
                         </div>
                         <div class="ml-12">
                             <div
                                 class="flex justify-between items-center text-slate-600 mb-2"
                             >
-                                <label for="radius" class="font-medium"
-                                    >Maximum distance:</label
+                                <label for="radiusSlider" class="font-medium"
+                                    >Distance maximale :</label
                                 >
-                                <span
-                                    id="radiusValue"
-                                    class="font-bold text-lg text-indigo-600 bg-indigo-100 px-3 py-1 rounded-md"
-                                    >850 km</span
+                                <div
+                                    class="flex items-center gap-1 bg-indigo-100 rounded-md px-2 py-1"
                                 >
+                                    <input
+                                        type="number"
+                                        id="radiusInput"
+                                        min="10"
+                                        max="2000"
+                                        value="850"
+                                        step="10"
+                                        disabled
+                                        class="w-16 text-center font-bold text-lg text-indigo-600 bg-transparent focus:outline-none"
+                                    />
+                                    <span class="font-bold text-indigo-600"
+                                        >km</span
+                                    >
+                                </div>
                             </div>
                             <input
                                 type="range"
-                                id="radius"
+                                id="radiusSlider"
                                 min="10"
                                 max="2000"
                                 value="850"
@@ -203,7 +225,7 @@
                                 >3</span
                             >
                             <h2 class="text-2xl font-bold text-slate-700">
-                                Final destination
+                                Destination finale
                             </h2>
                         </div>
                         <button
@@ -212,14 +234,16 @@
                             class="w-full flex items-center justify-center gap-3 bg-emerald-500 text-white font-bold py-4 px-4 rounded-lg shadow-lg hover:bg-emerald-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-slate-300 disabled:shadow-none disabled:cursor-not-allowed transform hover:scale-105"
                         >
                             <i data-feather="send" class="w-6 h-6"></i>
-                            <span class="text-xl">Find a destination!</span>
+                            <span class="text-xl"
+                                >Trouver une destination !</span
+                            >
                         </button>
                     </div>
                 </main>
 
                 <footer class="text-center text-slate-400 text-sm mt-10">
                     <p>
-                        Created with ❤️ for adventure. Maps by
+                        Créé avec ❤️ pour l'aventure. Cartes par
                         <a
                             href="https://www.openstreetmap.org/copyright"
                             target="_blank"
@@ -246,8 +270,8 @@
                 const searchAddressBtn =
                     document.getElementById("searchAddressBtn");
                 const findPointBtn = document.getElementById("findPointBtn");
-                const radiusSlider = document.getElementById("radius");
-                const radiusValueSpan = document.getElementById("radiusValue");
+                const radiusSlider = document.getElementById("radiusSlider");
+                const radiusInput = document.getElementById("radiusInput");
                 const step2 = document.getElementById("step2");
                 const step3 = document.getElementById("step3");
                 const step2Bubble = document.getElementById("step2-bubble");
@@ -272,7 +296,9 @@
                 locateBtn.addEventListener("click", locateUser);
                 addressForm.addEventListener("submit", searchAddress);
                 map.on("click", handleMapClick);
-                radiusSlider.addEventListener("input", updateRadiusUI);
+                radiusSlider.addEventListener("input", handleRadiusChange);
+                radiusInput.addEventListener("input", handleRadiusChange);
+                radiusInput.addEventListener("blur", validateRadiusOnBlur);
                 findPointBtn.addEventListener("click", findRandomPoint);
 
                 // --- MAIN FUNCTIONS ---
@@ -291,7 +317,7 @@
                         });
                         userMarker = L.marker([lat, lng], { icon: userIcon })
                             .addTo(map)
-                            .bindPopup("<b>Your starting point</b>");
+                            .bindPopup("<b>Votre point de départ</b>");
                     }
 
                     map.setView([lat, lng], zoomLevel);
@@ -302,7 +328,9 @@
 
                 function locateUser() {
                     if (!navigator.geolocation) {
-                        alert("Geolocation is not supported by your browser.");
+                        alert(
+                            "La géolocalisation n'est pas supportée par votre navigateur.",
+                        );
                         return;
                     }
 
@@ -317,7 +345,7 @@
                         },
                         (error) => {
                             alert(
-                                "Unable to retrieve your position. Have you authorized access? Try searching for your address or clicking on the map.",
+                                "Impossible de récupérer votre position. Avez-vous autorisé l'accès ? Essayez de chercher votre adresse ou de cliquer sur la carte.",
                             );
                             console.error(error);
                             setLocateBtnLoadingState(false);
@@ -329,7 +357,7 @@
                     event.preventDefault();
                     const query = addressInput.value;
                     if (!query) {
-                        alert("Please enter an address.");
+                        alert("Veuillez entrer une adresse.");
                         return;
                     }
                     setSearchBtnLoadingState(true);
@@ -346,13 +374,13 @@
                             setUserLocation(parseFloat(lat), parseFloat(lon));
                         } else {
                             alert(
-                                "Address not found. Try to be more specific.",
+                                "Adresse non trouvée. Essayez d'être plus précis.",
                             );
                         }
                     } catch (error) {
                         console.error("Geocoding error:", error);
                         alert(
-                            "An error occurred while searching for the address.",
+                            "Une erreur est survenue lors de la recherche de l'adresse.",
                         );
                     } finally {
                         setSearchBtnLoadingState(false);
@@ -362,7 +390,9 @@
                 function handleMapClick(e) {
                     if (
                         userLocation &&
-                        !confirm("Set this point as the new starting position?")
+                        !confirm(
+                            "Définir ce point comme nouvelle position de départ ?",
+                        )
                     ) {
                         return;
                     }
@@ -417,10 +447,10 @@
                 function setLocateBtnLoadingState(isLoading) {
                     if (isLoading) {
                         locateBtn.disabled = true;
-                        locateBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i> <span>Locating...</span>`;
+                        locateBtn.innerHTML = `<i data-feather="loader" class="w-5 h-5 animate-spin-slow"></i> <span>Localisation...</span>`;
                     } else {
                         locateBtn.disabled = false;
-                        locateBtn.innerHTML = `<i data-feather="map-pin" class="w-5 h-5"></i> <span>Locate me</span>`;
+                        locateBtn.innerHTML = `<i data-feather="map-pin" class="w-5 h-5"></i> <span>Me géolocaliser</span>`;
                     }
                     feather.replace();
                 }
@@ -443,6 +473,7 @@
                     );
                     step2Bubble.classList.add("bg-indigo-600", "text-white");
                     radiusSlider.disabled = false;
+                    radiusInput.disabled = false;
 
                     step3.classList.remove("opacity-40");
                     step3Bubble.classList.remove(
@@ -453,8 +484,37 @@
                     findPointBtn.disabled = false;
                 }
 
+                function handleRadiusChange(e) {
+                    const source = e.target.id;
+                    let value = e.target.value;
+
+                    if (source === "radiusSlider") {
+                        radiusInput.value = value;
+                    } else if (source === "radiusInput") {
+                        const numValue = parseInt(value, 10);
+                        if (isNaN(numValue)) return; // Don't update slider if input is empty or invalid
+
+                        const max = parseInt(radiusSlider.max, 10);
+                        if (numValue > max) {
+                            value = max;
+                            radiusInput.value = value;
+                        }
+                        radiusSlider.value = value;
+                    }
+                    updateRadiusUI();
+                }
+
+                function validateRadiusOnBlur() {
+                    const value = parseInt(radiusInput.value, 10);
+                    const min = parseInt(radiusSlider.min, 10);
+
+                    // If input is empty, invalid, or below min, reset to the slider's value
+                    if (isNaN(value) || value < min) {
+                        radiusInput.value = radiusSlider.value;
+                    }
+                }
+
                 function updateRadiusUI() {
-                    radiusValueSpan.textContent = `${radiusSlider.value} km`;
                     if (userLocation) {
                         drawSearchCircle();
                     }
